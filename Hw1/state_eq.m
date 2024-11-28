@@ -1,0 +1,46 @@
+function X_d=state_eq(t,X)
+% STATE_EQ    Dynamic state equation of motion
+% Input - state vector X = (qb, dqb)
+% Output - time-derivative vector X_d(t) = (dqb, ddqb)
+% Xianle Zeng
+% 27-Nov-2024 13:35:51
+
+%% assign the variables 
+qb = X(1:3);  dqb = X(4:6);
+
+%% Get the input angle (shape state)
+[phi, phi_d, phi_dd]=angles_input(t);
+qs = phi;
+dqs = phi_d; 
+ddqs = phi_dd;
+
+q = [qb; qs];
+q_d = [dqb; dqs];
+
+b = length(qb);
+s = length(qs);
+
+%% Get the dynamic model 
+[M,B,G]=dynamics_mat(q, q_d);
+
+Mbb = M(1:b, 1:b);
+Mbs = M(1:b, b+1:end);
+Mss = M(s:end, s:end);
+
+Bb = B(1:b);
+Bs = B(s:end);
+
+Gb = G(1:b);
+Gs = G(s:end);
+
+ddqb = Mbb\(Mbs*ddqs + Bb + Gb);
+
+X_d = [dqb; ddqb];
+
+
+
+
+
+
+
+
