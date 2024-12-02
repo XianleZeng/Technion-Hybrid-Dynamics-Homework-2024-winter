@@ -16,11 +16,12 @@ if isempty(dir([filename,'.mat']))
     
     %% generalized coordinates
     %
-    qs = [th;phi1;phi2];
-    qb = [x;y];  % z1, z2 : position of center of mass (extended variables)
+    qs = [phi1;phi2];
+    qb = [x;y;th];  % z1, z2 : position of center of mass (extended variables)
     q = [qb; qs];
     b = length(qb);
     s = length(qs);
+    
     
     %% first derivative of generalized coordinates
     %
@@ -33,12 +34,20 @@ if isempty(dir([filename,'.mat']))
     p_0 = [x; y];
     p_1 = p_0 - [l*(cos(phi1+th) + cos(th)); l*(sin(th) + sin(phi1+th))];
     p_2 = p_0 + [l*(cos(phi2+th) + cos(th)); l*(sin(th) + sin(phi2+th))];
+
+    %% position of the center of mass 
+    %
+    p_cm = (1/(3*m))*(p_0*m + p_1*m + p_2*m);
     
     %% velocities of masses in system
     %
     v_0 = jacobian(p_0,q)*dq;
     v_1 = jacobian(p_1,q)*dq;
     v_2 = jacobian(p_2,q)*dq;
+
+    %% velocity of the center of mass
+    %
+    v_cm = jacobian(p_cm,q)*dq;
     
     %% kinetic energy of masses in system
     %
@@ -118,8 +127,6 @@ end
 %
 
 N=max(size(q));
-b = length(qb);
-s = length(qs);
 
 %% First, output model to a file called
 %%
@@ -261,6 +268,56 @@ for k=1:len_phi
 	if phi_dd_input_2(k)~=0
 		ttt=char(phi_dd_input_2(k));
 		fprintf(fid,'\tphi_dd(%s)=%s;\n',num2str(k),ttt);
+	end
+end
+
+fprintf(fid,'end \n');
+
+%% Third, output model to a file called
+%%
+%%    center_of_mass.m
+%%
+%
+%% Output file header
+%
+fcn_name='center_of_mass';
+fid=fopen([fcn_name,'.m'],'w');
+fprintf(fid,'function [p_cm, v_cm]=%s',fcn_name);
+fprintf(fid,'(q, q_d)\n');
+fprintf(fid,'%% %s    center of mass of the cat\n',...
+	upper(fcn_name));
+fprintf(fid,'%% Input - values of generalized coordinate and their velocity q, q_dot \n');
+fprintf(fid,'%% Output - position of the center of mass p_cm, velocity of the center of mass v_cm \n');
+
+fprintf(fid,'%% Xianle Zeng\n');
+fprintf(fid,'%% %s\n\n',datestr(now));
+
+%% Read in constants
+%
+fprintf(fid,'[m, l, g]=model_params;\n\n');
+
+%% Reassign configuration parameters
+%
+fprintf(fid,'x=q(1); y=q(2); th=q(3); phi1=q(4); phi2=q(5);\n');
+fprintf(fid,'x_d=q_d(1); y_d=q_d(2); th_d=q_d(3); phi_d1=q_d(4); phi_d2=q_d(5);\n\n');
+
+%% Model output
+%
+fprintf(fid,'\n%% p_cm\n');
+fprintf(fid, 'p_cm=zeros(2,1);\n');
+for k=1:2
+	if p_cm(k)~=0
+		ttt=char(p_cm(k));
+		fprintf(fid,'p_cm(%s)=%s;\n',num2str(k),ttt);
+	end
+end
+
+fprintf(fid,'\n%% v_cm\n');
+fprintf(fid, 'v_cm=zeros(2,1);\n');
+for k=1:2
+	if v_cm(k)~=0
+		ttt=char(v_cm(k));
+		fprintf(fid,'v_cm(%s)=%s;\n',num2str(k),ttt);
 	end
 end
 

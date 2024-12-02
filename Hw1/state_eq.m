@@ -6,36 +6,11 @@ function X_d=state_eq(t,X)
 % 27-Nov-2024 13:35:51
 
 %% assign the variables 
-qb = X(1:3);  dqb = X(4:6);
+qb = X(1:3);  qb_d = X(4:6);
 
-%% Get the input angle (shape state)
-[phi, phi_d, phi_dd]=angles_input(t);
-qs = phi;
-dqs = phi_d; 
-ddqs = phi_dd;
+[qb_dd, ~] = dyn_sol(qb,qb_d,t);
 
-q = [qb; qs];
-q_d = [dqb; dqs];
-
-b = length(qb);
-s = length(qs);
-
-%% Get the dynamic model 
-[M,B,G]=dynamics_mat(q, q_d);
-
-Mbb = M(1:b, 1:b);
-Mbs = M(1:b, b+1:end);
-Mss = M(s:end, s:end);
-
-Bb = B(1:b);
-Bs = B(s:end);
-
-Gb = G(1:b);
-Gs = G(s:end);
-
-ddqb = Mbb\(Mbs*ddqs + Bb + Gb);
-
-X_d = [dqb; ddqb];
+X_d = [qb_d; qb_dd];
 
 
 
