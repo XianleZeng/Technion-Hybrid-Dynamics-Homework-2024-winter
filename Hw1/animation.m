@@ -78,6 +78,6 @@ for i = 1:length(t)
     ylim([y(i)-0.2, y(i)+0.2]);
 
     drawnow;
-    pause(0.05); 
+    pause(0.001); 
 end
 

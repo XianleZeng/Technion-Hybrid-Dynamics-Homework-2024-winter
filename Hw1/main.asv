@@ -4,7 +4,7 @@ close all;
 %% Solve DAE
 %
 options = odeset('RelTol', 1e-8, 'AbsTol', 1e-8);
-tspan = 0:0.05:40;  
+tspan = 0:0.001:40;  
 X0 = [0; 0; 0; 0; 0; 0];             
 [t, X] = ode45(@state_eq, tspan, X0, options); 
 
@@ -57,18 +57,22 @@ for i = 1:length(t)
 end
 theta_dd = qb_dd_data(3,:)';
 
+%%
+
+
 %% Plot the angle of middle link 
 %
 figure;
 hold on;
 plot(t, theta, 'LineWidth', 2);
-xlabel('Time (t)');
-ylabel('$\theta(t)$', 'Interpreter', 'latex');
+xlabel('Time (t) [s]', 'Interpreter', 'latex');
+ylabel('$\theta(t)$ [rad]', 'Interpreter', 'latex');
 grid on;
 set(gca, 'FontSize', 14);
 
 %% Figure for horizontal position of the middle link's center x(t)/l 
 % With center-of-mass position x_cm(t)/l
+% Need to plot: H(t)/ml^2w
 %
 figure;
 hold on;
@@ -82,7 +86,7 @@ lgd = legend;
 lgd.Interpreter = 'latex';  
 lgd.FontSize = 20;  
 grid on;
-set(gca, 'FontSize', 12);
+set(gca, 'FontSize', 14);
 
 %% Figure for horizontal position of the middle link's center x_dot(t)/lw 
 % With center-of-mass position x_dot_cm(t)/lw
@@ -99,7 +103,7 @@ lgd = legend;
 lgd.Interpreter = 'latex';  
 lgd.FontSize = 20;  
 grid on;
-set(gca, 'FontSize', 12);
+set(gca, 'FontSize', 14);
 
 %% Figure for horizontal position of the middle link's center y_dot(t)/lw 
 % With center-of-mass position y_dot_cm(t)/lw
@@ -116,7 +120,7 @@ lgd = legend;
 lgd.Interpreter = 'latex';  
 lgd.FontSize = 20;  
 grid on;
-set(gca, 'FontSize', 12);
+set(gca, 'FontSize', 14);
 
 %% Torques
 %
@@ -131,18 +135,33 @@ lgd = legend;
 lgd.Interpreter = 'latex';  
 lgd.FontSize = 20;  
 grid on;
+set(gca, 'FontSize', 14);
 
-%%  
+%%  Normalized angular velocity
+% Need to plot the angular velocity derive
+figure;
+hold on;
+plot(t(4:end), theta_d(4:end), 'LineWidth', 2, 'DisplayName', '$\frac{\ddot{\theta}(t)}{\omega^2}$')
+xlabel('Time (t) [s]', 'Interpreter', 'latex');
+ylabel('Normalized angular velocity $[\frac{1/s}{1/s}]$', 'Interpreter', 'latex');
+lgd = legend;  
+lgd.Interpreter = 'latex';  
+lgd.FontSize = 20;  
+grid on;
+set(gca, 'FontSize', 14);
+
+%%  Normalized angular acceleration
 %
 figure;
 hold on;
-plot(t(4:end), theta_dd(4:end)./theta_d(4:end).^2, 'LineWidth', 2, 'DisplayName', '$\frac{\ddot{\theta}(t)}{\omega^2}$')
+plot(t, theta_dd, 'LineWidth', 2, 'DisplayName', '$\frac{\ddot{\theta}(t)}{\omega^2}$')
 xlabel('Time (t) [s]', 'Interpreter', 'latex');
 ylabel('Normalized angular acceleration $[\frac{1/s^2}{1/s^2}]$', 'Interpreter', 'latex');
 lgd = legend;  
 lgd.Interpreter = 'latex';  
 lgd.FontSize = 20;  
 grid on;
+set(gca, 'FontSize', 14);
 
 %% Animation
 
