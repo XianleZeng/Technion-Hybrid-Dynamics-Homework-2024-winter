@@ -51,9 +51,10 @@ if isempty(dir([filename,'.mat']))
     
     %% kinetic energy of masses in system
     %
-    KE_0 = simplify(m/2*(v_0'*v_0));
-    KE_1 = simplify(m/2*(v_1'*v_1));
-    KE_2 = simplify(m/2*(v_2'*v_2));
+    I_c = m*l^2/3;
+    KE_0 = simplify(m/2*(v_0'*v_0)) + (1/2)*I_c*th_d^2;
+    KE_1 = simplify(m/2*(v_1'*v_1)) + (1/2)*I_c*(phi_d1+th_d)^2;
+    KE_2 = simplify(m/2*(v_2'*v_2)) + (1/2)*I_c*(phi_d2+th_d)^2;
     
     %% total kinetic energy of system
     %
@@ -73,7 +74,7 @@ if isempty(dir([filename,'.mat']))
     % M*ddq+C*dq+G = F
     M=simplify(jacobian(jacobian(KE,dq).',dq));
     
-    
+    %%
     N=max(size(q));
     syms C
     for k=1:N

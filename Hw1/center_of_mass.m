@@ -3,7 +3,7 @@ function [p_cm, v_cm]=center_of_mass(q, q_d)
 % Input - values of generalized coordinate and their velocity q, q_dot 
 % Output - position of the center of mass p_cm, velocity of the center of mass v_cm 
 % Xianle Zeng
-% 02-Dec-2024 14:55:05
+% 03-Dec-2024 10:16:16
 
 [m, l, g]=model_params;
 

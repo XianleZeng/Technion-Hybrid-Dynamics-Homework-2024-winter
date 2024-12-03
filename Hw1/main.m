@@ -4,7 +4,7 @@ close all;
 %% Solve DAE
 %
 options = odeset('RelTol', 1e-8, 'AbsTol', 1e-8);
-tspan = 0:0.001:40;  
+tspan = 0:0.05:40;  
 X0 = [0; 0; 0; 0; 0; 0];             
 [t, X] = ode45(@state_eq, tspan, X0, options); 
 
@@ -166,4 +166,4 @@ set(gca, 'FontSize', 14);
 
 %% Animation
 
-% animation(t,X);
+animation(t,X);

@@ -3,7 +3,7 @@ function [M,B,G]=dynamics_mat(q, q_d)
 % Input - values of generalized coordinate and their velocity q, q_dot 
 % Output - matrices/vectors M(q), B(q, q_dot), G(q) for the dynamics equation of motion 
 % Xianle Zeng
-% 02-Dec-2024 14:55:05
+% 03-Dec-2024 10:16:16
 
 [m, l, g]=model_params;
 
@@ -22,17 +22,17 @@ M(2,4)=-l*m*cos(phi1 + th);
 M(2,5)=l*m*cos(phi2 + th);
 M(3,1)=l*m*(sin(phi1 + th) - sin(phi2 + th));
 M(3,2)=-l*m*(cos(phi1 + th) - cos(phi2 + th));
-M(3,3)=2*l^2*m*(cos(phi1) + cos(phi2) + 2);
-M(3,4)=l^2*m*(cos(phi1) + 1);
-M(3,5)=l^2*m*(cos(phi2) + 1);
+M(3,3)=l^2*m*(2*cos(phi1) + 2*cos(phi2) + 5);
+M(3,4)=(l^2*m*(3*cos(phi1) + 4))/3;
+M(3,5)=(l^2*m*(3*cos(phi2) + 4))/3;
 M(4,1)=l*m*sin(phi1 + th);
 M(4,2)=-l*m*cos(phi1 + th);
-M(4,3)=l^2*m*(cos(phi1) + 1);
-M(4,4)=l^2*m;
+M(4,3)=(l^2*m*(3*cos(phi1) + 4))/3;
+M(4,4)=(4*l^2*m)/3;
 M(5,1)=-l*m*sin(phi2 + th);
 M(5,2)=l*m*cos(phi2 + th);
-M(5,3)=l^2*m*(cos(phi2) + 1);
-M(5,5)=l^2*m;
+M(5,3)=(l^2*m*(3*cos(phi2) + 4))/3;
+M(5,5)=(4*l^2*m)/3;
 
 % B matrix
 B=zeros(5,1);
