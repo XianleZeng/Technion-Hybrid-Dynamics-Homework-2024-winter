@@ -4,7 +4,7 @@ close all;
 %% Solve DAE
 %
 options = odeset('RelTol', 1e-8, 'AbsTol', 1e-8);
-tspan = 0:0.05:40;  
+tspan = 0:0.001:40;  
 X0 = [0; 0; 0; 0; 0; 0];             
 [t, X] = ode45(@state_eq, tspan, X0, options); 
 
@@ -70,6 +70,8 @@ xlabel('Time (t) [s]', 'Interpreter', 'latex');
 ylabel('$\theta(t)$ [rad]', 'Interpreter', 'latex');
 grid on;
 set(gca, 'FontSize', 14);
+axis tight;
+saveas(gcf, 'images/a.png');
 
 %% Figure for horizontal position of the middle link's center x(t)/l 
 % With center-of-mass position x_cm(t)/l
@@ -78,9 +80,9 @@ set(gca, 'FontSize', 14);
 figure;
 hold on;
 l = 0.1;
-plot(t, x/l, 'LineWidth', 2, 'DisplayName', '$\frac{x(t)}{l}$');
+plot(t, x/l, 'LineWidth', 4, 'DisplayName', '$\frac{x(t)}{l}$');
 hold on
-plot(t, p_cm_data(1,:)/l, 'DisplayName', '$\frac{x_c(t)}{l}$');
+plot(t, p_cm_data(1,:)/l, '--', 'LineWidth', 2, 'DisplayName', '$\frac{x_c(t)}{l}$');
 xlabel('Time (t) [s]', 'Interpreter', 'latex');
 ylabel('Normalized horizontal position [m/m]', 'Interpreter', 'latex');
 lgd = legend;  
@@ -88,8 +90,10 @@ lgd.Interpreter = 'latex';
 lgd.FontSize = 20;  
 grid on;
 set(gca, 'FontSize', 14);
+axis tight;
+saveas(gcf, 'images/b.png');
 
-%% Figure for horizontal position of the middle link's center x_dot(t)/lw 
+%% Figure for horizontal velocity of the middle link's center x_dot(t)/lw 
 % With center-of-mass position x_dot_cm(t)/lw
 %
 figure;
@@ -105,8 +109,10 @@ lgd.Interpreter = 'latex';
 lgd.FontSize = 20;  
 grid on;
 set(gca, 'FontSize', 14);
+axis tight;
+saveas(gcf, 'images/c.png');
 
-%% Figure for horizontal position of the middle link's center y_dot(t)/lw 
+%% Figure for vertical velocity of the middle link's center y_dot(t)/lw 
 % With center-of-mass position y_dot_cm(t)/lw
 %
 figure;
@@ -122,6 +128,8 @@ lgd.Interpreter = 'latex';
 lgd.FontSize = 20;  
 grid on;
 set(gca, 'FontSize', 14);
+axis tight;
+saveas(gcf, 'images/d.png');
 
 %% Torques
 %
@@ -137,12 +145,14 @@ lgd.Interpreter = 'latex';
 lgd.FontSize = 20;  
 grid on;
 set(gca, 'FontSize', 14);
+axis tight;
+saveas(gcf, 'images/f.png');
 
 %%  Normalized angular velocity
 % Need to plot the angular velocity derived by balance of angular momentum
 figure;
 hold on;
-plot(t, theta_d/w, 'LineWidth', 2, 'DisplayName', '$\frac{\ddot{\theta}(t)}{\omega^2}$')
+plot(t, theta_d/w, 'LineWidth', 2, 'DisplayName', '$\frac{\dot{\theta}(t)}{\omega^2}$')
 xlabel('Time (t) [s]', 'Interpreter', 'latex');
 ylabel('Normalized angular velocity $[\frac{1/s}{1/s}]$', 'Interpreter', 'latex');
 lgd = legend;  
@@ -150,6 +160,8 @@ lgd.Interpreter = 'latex';
 lgd.FontSize = 20;  
 grid on;
 set(gca, 'FontSize', 14);
+axis tight;
+saveas(gcf, 'images/e.png');
 
 %%  Normalized angular acceleration
 %
@@ -163,7 +175,9 @@ lgd.Interpreter = 'latex';
 lgd.FontSize = 20;  
 grid on;
 set(gca, 'FontSize', 14);
+axis tight;
+saveas(gcf, 'images/g.png');
 
 %% Animation
 
-animation(t,X);
+% animation(t,X);
