@@ -62,9 +62,9 @@ if isempty(dir([filename,'.mat']))
     
     %% potential energy of masses in system
     %
-    PE_0 = -p_0(2)*m*g;
-    PE_1 = -p_1(2)*m*g;
-    PE_2 = -p_2(2)*m*g;
+    PE_0 = p_0(2)*m*g;
+    PE_1 = p_1(2)*m*g;
+    PE_2 = p_2(2)*m*g;
     
     %% total potential energy of system
     %

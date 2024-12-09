@@ -4,7 +4,7 @@ close all;
 %% Solve DAE
 %
 options = odeset('RelTol', 1e-8, 'AbsTol', 1e-8);
-tspan = 0:0.001:40;  
+tspan = 0:0.01:40;  
 X0 = [0; 0; 0; 0; 0; 0];             
 [t, X] = ode45(@state_eq, tspan, X0, options); 
 
@@ -27,7 +27,6 @@ phi2_d = phi_d_data(2,:)';
 x = X(:, 1);
 y = X(:, 2);
 theta = X(:, 3);
-theta = rad2deg(theta);
 x_d = X(:, 4);
 y_d = X(:, 5);
 theta_d = X(:, 6);
@@ -46,6 +45,9 @@ for i = 1:length(t)
     p_cm_data = [p_cm_data, p_cm];
     v_cm_data = [v_cm_data, v_cm];
 end
+x_cm = p_cm_data(1,:);
+y_cm = p_cm_data(2,:);
+
 
 %% Torque and qb_dd
 %
@@ -80,9 +82,9 @@ saveas(gcf, 'images/a.png');
 figure;
 hold on;
 l = 0.1;
-plot(t, x/l, 'LineWidth', 4, 'DisplayName', '$\frac{x(t)}{l}$');
+plot(t, x/l, 'LineWidth', 2, 'DisplayName', '$\frac{x(t)}{l}$');
 hold on
-plot(t, p_cm_data(1,:)/l, '--', 'LineWidth', 2, 'DisplayName', '$\frac{x_c(t)}{l}$');
+plot(t, x_cm/l, '--', 'LineWidth', 2, 'DisplayName', '$\frac{x_c(t)}{l}$');
 xlabel('Time (t) [s]', 'Interpreter', 'latex');
 ylabel('Normalized horizontal position [m/m]', 'Interpreter', 'latex');
 lgd = legend;  
@@ -179,5 +181,4 @@ axis tight;
 saveas(gcf, 'images/g.png');
 
 %% Animation
-
-% animation(t,X);
+animation(t,X);
