@@ -32,7 +32,7 @@ end
 x_cm = p_cm_data(1,:);
 y_cm = p_cm_data(2,:);
 
-L = 0.1;  
+L = 0.2;  
 
 % Initialization
 figure;
@@ -44,7 +44,7 @@ h_CoM = plot(x_cm(1), y_cm(1), 'bo', 'MarkerSize', 10, 'LineWidth', 2, 'MarkerFa
 h_rod0 = plot([0, 0], [0, 0], 'b-', 'LineWidth', 2); % mid_link
 h_rod1 = plot([0, 0], [0, 0], 'g-', 'LineWidth', 2); % left_link
 h_rod2 = plot([0, 0], [0, 0], 'r-', 'LineWidth', 2); % right_link
-xlim([-0.2, 0.2]);
+xlim([-0.4, 0.4]);
 for i = 1:length(t)
     % End coordinates of the left link of the middle link
     x0_start = x(i) - (L / 2) * cos(theta(i));
@@ -75,7 +75,7 @@ for i = 1:length(t)
     y_min = min(all_y) - 0.1;
     y_max = max(all_y) + 0.1;
 
-    ylim([y(i)-0.2, y(i)+0.2]);
+    ylim([y(i)-0.4, y(i)+0.4]);
 
     drawnow;
     pause(0.001); 

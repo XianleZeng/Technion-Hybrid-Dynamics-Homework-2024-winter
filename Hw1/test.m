@@ -18,4 +18,5 @@
 X0 = [0; 0; 0; 0; 0; 0];   
 qb = X0(1:3);  qb_d = X0(4:6);
 t = 1;
-[qb_dd, tau]=dyn_sol(qb,qb_d,t)
+[qb_dd, tau]=dyn_sol(qb,qb_d,t);
+

@@ -11,47 +11,82 @@ if isempty(dir([filename,'.mat']))
     %
     syms th phi1 phi2 x y x1 y1 x2 y2 real
     syms th_d phi_d1 phi_d2 x_d y_d real
+    syms th_dd phi_dd1 phi_dd2 x_dd y_dd real
     syms tau1 tau2
     syms m g l real
     
     %% generalized coordinates
     %
     qs = [phi1;phi2];
-    qb = [x;y;th];  % z1, z2 : position of center of mass (extended variables)
+    qb = [x;y;th];  
     q = [qb; qs];
     b = length(qb);
     s = length(qs);
-    
     
     %% first derivative of generalized coordinates
     %
     dqs = [th_d;phi_d1;phi_d2];
     dqb = [x_d; y_d];
     dq = [dqb; dqs];
+
+    %% Second derivative of generalized coordinates
+    %
+    ddqs = [th_dd;phi_dd1;phi_dd2];
+    ddqb = [x_dd; y_dd];
+    ddq = [ddqb; ddqs];
     
-    %% position of masses in system
+    %% position of masses in system (center of mass for each link)
     %
     p_0 = [x; y];
     p_1 = p_0 - [l*(cos(phi1+th) + cos(th)); l*(sin(th) + sin(phi1+th))];
     p_2 = p_0 + [l*(cos(phi2+th) + cos(th)); l*(sin(th) + sin(phi2+th))];
+    p_end_2 = p_0 + [l*cos(th); l*sin(th)];
 
     %% position of the center of mass 
     %
     p_cm = (1/(3*m))*(p_0*m + p_1*m + p_2*m);
     
-    %% velocities of masses in system
+    %% velocities of masses in system (center of mass for each link)
     %
     v_0 = jacobian(p_0,q)*dq;
     v_1 = jacobian(p_1,q)*dq;
     v_2 = jacobian(p_2,q)*dq;
+    v_end_2 = jacobian(p_end_2,q)*dq;
+    a_end_2 = jacobian(v_end_2,q)*ddq;
 
     %% velocity of the center of mass
     %
     v_cm = jacobian(p_cm,q)*dq;
     
-    %% kinetic energy of masses in system
+    %% total angular momentum
     %
     I_c = m*l^2/3;
+    temp_0 = cross([p_0 - p_cm; 0], [v_0 - v_cm; 0])*m;
+    temp_1 = cross([p_1 - p_cm; 0], [v_1 - v_cm; 0])*m;
+    temp_2 = cross([p_2 - p_cm; 0], [v_2 - v_cm; 0])*m;
+    H_0 = temp_0(3) + I_c*th_d;
+    H_1 = temp_1(3) + I_c*(th_d+phi_d1);
+    H_2 = temp_2(3) + I_c*(th_d+phi_d2);
+    H_total = H_0 + H_1 + H_2; 
+    th_d_H = solve(H_total, th_d);
+
+    %% angular momentum of link2 w.r.t p_end_2
+    %
+    I_c2 = (4/3)*m*l^2;
+    r_2p2 = [; 0];
+    r_2_dd = [a_end_2; 0];
+    temp = cross(r_2p2,r_2_dd);
+    eqn = - tau2 + m*g*l*cos(phi2+th) + I_c2*(phi_dd2 + th_dd) + m*temp(3);
+    % temp_2 = cross([p_2 - p_end_2; 0], [v_2 - v_end_2; 0])*m;
+    % H_2 = temp_2(3) + I_c2*(th_d+phi_d2);
+    % dH_2 = jacobian(H_2, dq)*ddq;
+    % eqn = simplify(dH_2 - tau2 + m*g*l*cos(phi2+th));
+    th_dd_H = solve(eqn, th_dd);
+
+    %% solve H_total w.r.t. theta
+
+    %% kinetic energy of masses in system
+    %
     KE_0 = simplify(m/2*(v_0'*v_0)) + (1/2)*I_c*th_d^2;
     KE_1 = simplify(m/2*(v_1'*v_1)) + (1/2)*I_c*(phi_d1+th_d)^2;
     KE_2 = simplify(m/2*(v_2'*v_2)) + (1/2)*I_c*(phi_d2+th_d)^2;
@@ -109,7 +144,6 @@ if isempty(dir([filename,'.mat']))
     phi_input_2 = [phi1_input_2; phi2_input_2];
     phi_d_input_2 = diff(phi_input_2, t);
     phi_dd_input_2 = diff(phi_d_input_2, t);
-    
 
     %%
     %
@@ -321,5 +355,79 @@ for k=1:2
 		fprintf(fid,'v_cm(%s)=%s;\n',num2str(k),ttt);
 	end
 end
+
+fprintf(fid,'end \n');
+
+%% Fourth, output model to a file called
+%%
+%%    Total_angular_momentum.m
+%%
+%
+%% Output file header
+%
+fcn_name='Total_angular_momentum';
+fid=fopen([fcn_name,'.m'],'w');
+fprintf(fid,'function H_total=%s',fcn_name);
+fprintf(fid,'(q, q_d, t)\n');
+fprintf(fid,'%% %s    center of mass of the cat\n',...
+	upper(fcn_name));
+fprintf(fid,'%% Input - values of generalized coordinate and their velocity q, q_dot \n');
+fprintf(fid,'%% Output - Total Angular Momentum of the System H_tatol \n');
+
+fprintf(fid,'%% Xianle Zeng\n');
+fprintf(fid,'%% %s\n\n',datestr(now));
+
+%% Read in constants
+%
+fprintf(fid,'[m, l, g]=model_params;\n\n');
+
+%% Reassign configuration parameters
+%
+fprintf(fid,'x=q(1); y=q(2); th=q(3); phi1=q(4); phi2=q(5);\n');
+fprintf(fid,'x_d=q_d(1); y_d=q_d(2); th_d=q_d(3); phi_d1=q_d(4); phi_d2=q_d(5);\n\n');
+fprintf(fid,'qb = [x; y; th]; qb_d = [x_d; y_d; th_d];\n');
+
+%% Get the tau
+%
+fprintf(fid, '[qb_dd, tau]=dyn_sol(qb,qb_d,t); \n');
+fprintf(fid, 'tau1 = tau(1); tau2 = tau(2); \n');
+
+%% Model output
+%
+fprintf(fid,'\n%% H_total\n');
+fprintf(fid,'H_total=%s;\n',H_total);
+
+fprintf(fid,'end \n');
+
+%% Fifth, output model to a file called
+%%
+%%    theta_d_H.m
+%%
+%
+%% Output file header
+%
+fcn_name='theta_d_H';
+fid=fopen([fcn_name,'.m'],'w');
+fprintf(fid,'function th_d_H=%s',fcn_name);
+fprintf(fid,'(q, q_d)\n');
+fprintf(fid,'%% %s    center of mass of the cat\n',...
+	upper(fcn_name));
+
+fprintf(fid,'%% Xianle Zeng\n');
+fprintf(fid,'%% %s\n\n',datestr(now));
+
+%% Read in constants
+%
+fprintf(fid,'[m, l, g]=model_params;\n\n');
+
+%% Reassign configuration parameters
+%
+fprintf(fid,'x=q(1); y=q(2); th=q(3); phi1=q(4); phi2=q(5);\n');
+fprintf(fid,'x_d=q_d(1); y_d=q_d(2); th_d=q_d(3); phi_d1=q_d(4); phi_d2=q_d(5);\n\n');
+
+%% Model output
+%
+fprintf(fid,'\n%% th_d_H\n');
+fprintf(fid,'th_d_H=%s;\n',th_d_H);
 
 fprintf(fid,'end \n');
