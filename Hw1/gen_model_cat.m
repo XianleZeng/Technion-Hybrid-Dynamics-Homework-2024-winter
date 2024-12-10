@@ -70,21 +70,6 @@ if isempty(dir([filename,'.mat']))
     H_total = H_0 + H_1 + H_2; 
     th_d_H = solve(H_total, th_d);
 
-    %% angular momentum of link2 w.r.t p_end_2
-    %
-    I_c2 = (4/3)*m*l^2;
-    r_2p2 = [; 0];
-    r_2_dd = [a_end_2; 0];
-    temp = cross(r_2p2,r_2_dd);
-    eqn = - tau2 + m*g*l*cos(phi2+th) + I_c2*(phi_dd2 + th_dd) + m*temp(3);
-    % temp_2 = cross([p_2 - p_end_2; 0], [v_2 - v_end_2; 0])*m;
-    % H_2 = temp_2(3) + I_c2*(th_d+phi_d2);
-    % dH_2 = jacobian(H_2, dq)*ddq;
-    % eqn = simplify(dH_2 - tau2 + m*g*l*cos(phi2+th));
-    th_dd_H = solve(eqn, th_dd);
-
-    %% solve H_total w.r.t. theta
-
     %% kinetic energy of masses in system
     %
     KE_0 = simplify(m/2*(v_0'*v_0)) + (1/2)*I_c*th_d^2;
