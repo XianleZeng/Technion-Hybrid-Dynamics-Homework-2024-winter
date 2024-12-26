@@ -3,7 +3,7 @@ function [M,B,G]=dynamics_mat(q, q_d)
 % Input - values of generalized coordinate and their velocity q, q_dot 
 % Output - matrices/vectors M(q), B(q, q_dot), G(q) for the dynamics equation of motion 
 % Xianle Zeng
-% 10-Dec-2024 20:04:49
+% 26-Dec-2024 11:27:12
 
 [m, l, g]=model_params;
 
