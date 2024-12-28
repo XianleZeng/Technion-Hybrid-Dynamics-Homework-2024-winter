@@ -3,7 +3,7 @@ function H_total=Total_angular_momentum(q, q_d, t)
 % Input - values of generalized coordinate and their velocity q, q_dot 
 % Output - Total Angular Momentum of the System H_tatol 
 % Xianle Zeng
-% 26-Dec-2024 11:27:13
+% 28-Dec-2024 19:40:30
 
 [m, l, g]=model_params;
 

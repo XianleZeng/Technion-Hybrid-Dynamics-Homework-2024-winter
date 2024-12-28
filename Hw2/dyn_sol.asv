@@ -1,43 +1,48 @@
-function [qp_dd, lambda]=dyn_sol(qp,qp_d,t)
+function [q_dd, lambda]=dyn_sol(t,X)
 % DYN_SOL    Dynamic solution
 % Xianle Zeng
 
 
-%% Get the input angle (shape state)
-[phi, phi_d, phi_dd]=angles_input(t);
-qs = phi;
-dqs = phi_d; 
-ddqs = phi_dd;
+%% Get tactuated torque
+%
+F_qa = input_torque(t);
 
-q = [qp; qa];
-dq = [qp_d; qa_d];
+%% read in params
+%
+m = 2;
+x=X(1); y=X(2); theta=X(3); phi=X(4); 
+x_d=X(5); y_d=X(6); theta_d=X(7); phi_d=X(8); 
 
-n_p = length(qp);
-n_a = length(qa);
+q_p = [x; y; theta];
+q_a = phi;
+dq_p = [x_d; y_d; theta_d];
+dq_a = phi_d;
+q = [q_p; q_a];
+dq = [dq_p; dq_a];
 
 %% Get the dynamic model 
-[M,B,W,W_d]=dynamics_mat(q, dq);
+[M,Mpp,Mpa,Maa,B,Bp,Ba,W,W_d,Wp,Wa,Wp_d,Wa_d]=dynamics_mat(q, dq);
 
-Mpp = M(1:b, 1:b);
-Mpa = M(1:b, b+1:end);
-Maa = M(b+1:end, b+1:end);
+% H = [Mpp, Mpa, -Wp';
+%        Mpa', Maa, -Wa';
+%        Wp, Wa, zeros(m)];
+H = [M, -W';
+       W, zeros(2)];
 
-Bb = B(1:b);
-Bs = B(b+1:end);
+% K = [-Bp - zeros(size(Bp));
+%         F_qa - Ba - zeros(size(Ba));
+%         -Wp_d*dq_p - Wa_d*dq_a];
 
-Gb = G(1:b);
-Gs = G(b+1:end);
+K = [-Bp - zeros(size(Bp));
+        F_qa - Ba - zeros(size(Ba));
+        -Wp_d*dq_p - Wa_d*dq_a];
 
-A = [Mbb, zeros(b,s);
-       Mbs', -eye(s,s)];
+dX = H\K;
 
-B = -[Mbs*ddqs + Bb + Gb;
-        Mss*ddqs + Bs + Gs];
-
-dX = A\B;
-
-qb_dd = dX(1:3);
-tau= dX(4:5);
+q_dd = zeros(8,1);
+q_dd(1:4) = dq;
+q_dd(5:8) = dX(1:4);
+lambda= dX(5:6);
 
 end
 

@@ -32,6 +32,8 @@ if isempty(dir([filename,'.mat']))
     N=max(size(q));
     n_p = length(q_p);
     n_a = length(q_a);
+
+    v_P = [x_d; y_d; 0];
     
     %% position (p_cm), velocities (v_cm) of center of mass
     %
@@ -73,7 +75,7 @@ if isempty(dir([filename,'.mat']))
     n1_hat = R*e2_prime;
     n3_hat = - [1; 0; 0];
     
-    f_1 = simplify(v_wheel_1'*n1_hat);
+    f_1 = simplify(v_P'*n1_hat);
     f_3 = simplify(v_wheel_3'*n3_hat);
     
     f_1 = collect(collect(collect(collect(f_1, x_d), y_d),theta_d), phi_d);
@@ -209,7 +211,7 @@ for k=1:n_a
 end
 
 fprintf(fid,'%% Mpa matrix\n');
-fprintf(fid,'Mpa=zeros(%s, %s);\n',num2str(n_p, n_a));
+fprintf(fid,'Mpa=zeros(%s, %s);\n',num2str(n_p), num2str(n_a));
 for k=1:n_p
 	for j=1:n_a
 		if Mpa(k,j)~=0
@@ -258,6 +260,27 @@ for k = 1:m
     end
 end
 
+fprintf(fid,'\n%% Wp matrix\n');
+fprintf(fid,'Wp=zeros(%s, %s);\n',num2str(m), num2str(n_p));
+for k = 1:m
+    for j = 1:n_p
+		if Wp(k,j)~=0
+			ttt=char(Wp(k,j));
+			fprintf(fid,'Wp(%s,%s)=%s;\n',num2str(k),num2str(j),ttt);
+		end
+    end
+end
+
+fprintf(fid,'\n%% Wa matrix\n');
+fprintf(fid,'Wa=zeros(%s,1);\n',num2str(m));
+for k=1:m
+	if Wa(k)~=0
+		ttt=char(Wa(k));
+		fprintf(fid,'Wa(%s)=%s;\n',num2str(k),ttt);
+	end
+end
+
+
 fprintf(fid,'\n%% W_d matrix\n');
 fprintf(fid,'W_d=zeros(%s, %s);\n',num2str(m), num2str(N));
 for k = 1:m
@@ -267,4 +290,24 @@ for k = 1:m
 			fprintf(fid,'W_d(%s,%s)=%s;\n',num2str(k),num2str(j),ttt);
 		end
     end
+end
+
+fprintf(fid,'\n%% Wp_d matrix\n');
+fprintf(fid,'Wp_d=zeros(%s, %s);\n',num2str(m), num2str(n_p));
+for k = 1:m
+    for j = 1:n_p
+		if Wp_d(k,j)~=0
+			ttt=char(Wp_d(k,j));
+			fprintf(fid,'Wp_d(%s,%s)=%s;\n',num2str(k),num2str(j),ttt);
+		end
+    end
+end
+
+fprintf(fid,'\n%% Wa_d matrix\n');
+fprintf(fid,'Wa_d=zeros(%s,1);\n',num2str(m));
+for k=1:m
+	if Wa_d(k)~=0
+		ttt=char(Wa_d(k));
+		fprintf(fid,'Wa_d(%s)=%s;\n',num2str(k),ttt);
+	end
 end

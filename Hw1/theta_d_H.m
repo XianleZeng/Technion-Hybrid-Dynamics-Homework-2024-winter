@@ -1,7 +1,7 @@
 function th_d_H=theta_d_H(q, q_d)
 % THETA_D_H    center of mass of the cat
 % Xianle Zeng
-% 26-Dec-2024 11:27:13
+% 28-Dec-2024 19:40:30
 
 [m, l, g]=model_params;
 

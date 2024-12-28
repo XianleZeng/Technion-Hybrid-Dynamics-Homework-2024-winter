@@ -3,7 +3,7 @@ function [phi, phi_d, phi_dd]=angles_input(t)
 % Input - time t 
 % Output - vectors of phi(t), phi_d(t), phi_dd(t) 
 % Xianle Zeng
-% 26-Dec-2024 11:27:13
+% 28-Dec-2024 19:40:30
 
 [omega,alfa,Psi,beta]=control_parameters;
 
