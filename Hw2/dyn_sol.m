@@ -20,12 +20,13 @@ dq_a = phi_d;
 q = [q_p; q_a];
 dq = [dq_p; dq_a];
 
-%% Get the dynamic model 
+%% Get the dynamic model H*[ddq; lambda] = K
 [M,Mpp,Mpa,Maa,B,Bp,Ba,W,W_d,Wp,Wa,Wp_d,Wa_d]=dynamics_mat(q, dq);
 
 % H = [Mpp, Mpa, -Wp';
 %        Mpa', Maa, -Wa';
 %        Wp, Wa, zeros(m)];
+
 H = [M, -W';
        W, zeros(2)];
 

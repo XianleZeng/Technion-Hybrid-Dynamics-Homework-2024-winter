@@ -33,6 +33,7 @@ if isempty(dir([filename,'.mat']))
     n_p = length(q_p);
     n_a = length(q_a);
 
+    r_P = [x; y; 0];
     v_P = [x_d; y_d; 0];
     
     %% position (p_cm), velocities (v_cm) of center of mass
@@ -49,21 +50,26 @@ if isempty(dir([filename,'.mat']))
     R = [cos(theta), -sin(theta), 0;
            sin(theta), cos(theta), 0;
            0, 0, 1];
+    R_phi = [cos(phi+theta), -sin(phi+theta), 0;
+           sin(phi+theta), cos(phi+theta), 0;
+           0, 0, 1];
     
     %% position, velocities of the wheels
     %
-    r_cm_to_wheel_1 = [-d; w/2; 0];
-    r_cm_to_wheel_2 = [-d; -w/2; 0];
-    r_cm_to_wheel_3 = [l-d+b*cos(phi); b*sin(phi); 0];
+    r_P_to_wheel_1 = [w/2*cos(theta+pi/2); w/2*sin(theta+pi/2); 0];
+    r_P_to_wheel_2 = [-w/2*cos(theta+pi/2); -w/2*sin(theta+pi/2); 0];
+    r_P_to_wheel_3 = [l*cos(theta)+b*cos(theta+phi); l*sin(theta)+b*sin(theta+phi); 0];
     
-    r_wheel_1 =  R*r_cm_to_wheel_1 + r_cm;
-    v_wheel_1 = v_cm + cross(omega_theta, r_cm_to_wheel_1);
+    r_wheel_1 =  r_P_to_wheel_1 + r_P;
+    v_wheel_1 = jacobian(r_wheel_1, q)*dq;
     
-    r_wheel_2 =  R*r_cm_to_wheel_2 + r_cm;
-    v_wheel_2 = v_cm + cross(omega_theta, r_cm_to_wheel_2);
+    r_wheel_2 =  r_P_to_wheel_2 + r_P;
+    v_wheel_2 = jacobian(r_wheel_2, q)*dq;
     
-    r_wheel_3 =  R*r_cm_to_wheel_3 + r_cm;
-    v_wheel_3 = v_cm + cross(omega_theta + omega_phi, r_cm_to_wheel_3);
+    r_wheel_3 =  r_P_to_wheel_3 + r_P;
+    v_wheel_3 = jacobian(r_wheel_3, q)*dq;
+
+
     %% kinetic energy and ﻿dissipation function
     %
     KE = simplify(m/2*(v_cm'*v_cm) + (1/2)*I_c*theta_d^2);
@@ -73,27 +79,15 @@ if isempty(dir([filename,'.mat']))
     %
     e2_prime = [0; 1; 0];
     n1_hat = R*e2_prime;
-    n3_hat = - [1; 0; 0];
+    n3_hat = R_phi*[0; 1; 0];
     
     f_1 = simplify(v_P'*n1_hat);
     f_3 = simplify(v_wheel_3'*n3_hat);
     
-    f_1 = collect(collect(collect(collect(f_1, x_d), y_d),theta_d), phi_d);
-    f_3 = collect(collect(collect(collect(f_3, x_d), y_d),theta_d), phi_d);
-    
     f = [f_1; f_3];
     m = max(size(f));
-   
-
-    W = sym(zeros(m, N));
-    for i = 1:m
-        for j = 1:N
-            [coeff, ~] = coeffs(f(i), dq(j));
-            if (length(coeff) == 2)
-                W(i, j) = coeff(1);
-            end
-        end
-    end
+    
+    W = jacobian(f, dq);
 
     Wp = W(:, 1:n_p);
     Wa = W(:, n_p+1:end);
