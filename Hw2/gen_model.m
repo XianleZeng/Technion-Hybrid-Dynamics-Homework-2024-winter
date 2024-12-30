@@ -41,9 +41,9 @@ if isempty(dir([filename,'.mat']))
     omega_theta = [0; 0; theta_d];
     omega_phi = [0; 0; phi_d];
     
-    r_P_to_cm = [d*cos(theta); d*sin(theta); 0];
-    r_cm = [x + d*cos(theta); y + d*sin(theta); 0];
-    v_cm = [x_d; y_d; 0] + cross(omega_theta, r_P_to_cm);
+    r_cm = [x + d*cos(theta); y + d*sin(theta)];
+    v_cm = jacobian(r_cm, q)*dq;
+    a_cm = jacobian(v_cm, [q; dq])*[dq; ddq]; 
     
     %% Rotation matrix of the float-based coordinate:
     %
@@ -105,11 +105,9 @@ if isempty(dir([filename,'.mat']))
     %%
     % M*ddq+B = F
     M=simplify(jacobian(jacobian(KE,dq).',dq));
-    
     Mpp = M(1:n_p, 1:n_p);
     Mpa = M(1:n_p, n_p+1:end);
     Maa = M(n_p+1:end, n_p+1:end);
-
 
     %%
     syms C1
@@ -126,6 +124,15 @@ if isempty(dir([filename,'.mat']))
 
     Bp = B(1:n_p);
     Ba = B(n_p+1:end);
+
+    syms G
+    for j=1:N
+        G(j) = 0;
+    end
+    G = G';
+
+    Ga = G(1:n_a);
+    Gp = G(n_a+1:end);
 
     %%
     %
@@ -152,8 +159,8 @@ end
 %
 fcn_name='dynamics_mat';
 fid=fopen([fcn_name,'.m'],'w');
-fprintf(fid,'function [M,Mpp,Mpa,Maa,B,Bp,Ba,W,W_d,Wp,Wa,Wp_d,Wa_d]=%s',fcn_name);
-fprintf(fid,'(q, q_d)\n');
+fprintf(fid,'function [M,Mpp,Mpa,Maa,B,Bp,Ba,G,Gp,Ga,W,W_d,Wp,Wa,Wp_d,Wa_d]=%s',fcn_name);
+fprintf(fid,'(q, q_d, damping)\n');
 fprintf(fid,'%% %s    Model of three-link robot cat.\n',...
 	upper(fcn_name));
 
@@ -162,7 +169,7 @@ fprintf(fid,'%% %s\n\n',datestr(now));
 
 %% Read in constants
 %
-fprintf(fid,'[m, l, I_c, d, w, b, c]=model_params;\n\n');
+fprintf(fid,'[m, l, I_c, d, w, b, c]=model_params(''damping'', damping);\n\n');
 
 %% Reassign configuration parameters
 %
@@ -243,6 +250,34 @@ for k=1:n_a
 	end
 end
 
+fprintf(fid,'\n%% G matrix\n');
+fprintf(fid,'G=zeros(%s,1);\n',num2str(N));
+for k=1:N
+	if G(k)~=0
+		ttt=char(G(k));
+		fprintf(fid,'G(%s)=%s;\n',num2str(k),ttt);
+	end
+end
+
+fprintf(fid,'\n%% Ga matrix\n');
+fprintf(fid,'Ga=zeros(%s,1);\n',num2str(n_a));
+for k=1:n_a
+	if Ga(k)~=0
+		ttt=char(Ga(k));
+		fprintf(fid,'Ga(%s)=%s;\n',num2str(k),ttt);
+	end
+end
+
+fprintf(fid,'\n%% Gp matrix\n');
+fprintf(fid,'Gp=zeros(%s,1);\n',num2str(n_p));
+for k=1:n_p
+	if Gp(k)~=0
+		ttt=char(Gp(k));
+		fprintf(fid,'Gp(%s)=%s;\n',num2str(k),ttt);
+	end
+end
+
+
 fprintf(fid,'\n%% W matrix\n');
 fprintf(fid,'W=zeros(%s, %s);\n',num2str(m), num2str(N));
 for k = 1:m
@@ -303,5 +338,103 @@ for k=1:m
 	if Wa_d(k)~=0
 		ttt=char(Wa_d(k));
 		fprintf(fid,'Wa_d(%s)=%s;\n',num2str(k),ttt);
+	end
+end
+
+%% Second, output model to a file called
+%%
+%%    center_of_mass.m
+%%
+%
+%% Output file header
+%
+fcn_name='center_of_mass';
+fid=fopen([fcn_name,'.m'],'w');
+fprintf(fid,'function [r_cm, v_cm, a_cm]=%s',fcn_name);
+fprintf(fid,'(q, q_d, q_dd)\n');
+fprintf(fid,'%% %s    center of mass of the cat\n',...
+	upper(fcn_name));
+fprintf(fid,'%% Input - values of generalized coordinate and their velocity q, q_dot \n');
+fprintf(fid,'%% Output - position of the center of mass p_cm, velocity of the center of mass v_cm \n');
+
+fprintf(fid,'%% Xianle Zeng\n');
+fprintf(fid,'%% %s\n\n',datestr(now));
+
+%% Read in constants
+%
+fprintf(fid,'[m, l, I_c, d, w, b, c]=model_params;\n\n');
+
+%% Reassign configuration parameters
+%
+fprintf(fid,'x=q(1); y=q(2); theta=q(3); phi=q(4);\n');
+fprintf(fid,'x_d=q_d(1); y_d=q_d(2); theta_d=q_d(3); phi_d=q_d(4);\n\n');
+fprintf(fid,'x_dd=q_dd(1); y_dd=q_dd(2); theta_dd=q_dd(3); phi_dd=q_dd(4);\n\n');
+
+%% Model output
+%
+fprintf(fid,'\n%% r_cm\n');
+fprintf(fid, 'r_cm=zeros(2,1);\n');
+for k=1:2
+	if r_cm(k)~=0
+		ttt=char(r_cm(k));
+		fprintf(fid,'r_cm(%s)=%s;\n',num2str(k),ttt);
+	end
+end
+
+fprintf(fid,'\n%% v_cm\n');
+fprintf(fid, 'v_cm=zeros(2,1);\n');
+for k=1:2
+	if v_cm(k)~=0
+		ttt=char(v_cm(k));
+		fprintf(fid,'v_cm(%s)=%s;\n',num2str(k),ttt);
+	end
+end
+
+fprintf(fid,'\n%% a_cm\n');
+fprintf(fid, 'a_cm=zeros(2,1);\n');
+for k=1:2
+	if a_cm(k)~=0
+		ttt=char(a_cm(k));
+		fprintf(fid,'a_cm(%s)=%s;\n',num2str(k),ttt);
+	end
+end
+
+
+fprintf(fid,'end \n');
+
+
+
+
+%% Third, output model to a file called
+%%
+%%    v_wheel_3.m
+%%
+%
+%% Output file header
+%
+fcn_name='v_wheel_3';
+fid=fopen([fcn_name,'.m'],'w');
+fprintf(fid,'function v_wheel_3=%s',fcn_name);
+fprintf(fid,'(q, q_d)\n');
+fprintf(fid,'%% Xianle Zeng\n');
+fprintf(fid,'%% %s\n\n',datestr(now));
+
+%% Read in constants
+%
+fprintf(fid,'[m, l, I_c, d, w, b, c]=model_params;\n\n');
+
+%% Reassign configuration parameters
+%
+fprintf(fid,'x=q(1); y=q(2); theta=q(3); phi=q(4);\n');
+fprintf(fid,'x_d=q_d(1); y_d=q_d(2); theta_d=q_d(3); phi_d=q_d(4);\n\n');
+
+%% Model output
+%
+fprintf(fid,'\n%% v_wheel_3\n');
+fprintf(fid, 'v_wheel_3=zeros(2,1);\n');
+for k=1:2
+	if v_wheel_3(k)~=0
+		ttt=char(v_wheel_3(k));
+		fprintf(fid,'v_wheel_3(%s)=%s;\n',num2str(k),ttt);
 	end
 end

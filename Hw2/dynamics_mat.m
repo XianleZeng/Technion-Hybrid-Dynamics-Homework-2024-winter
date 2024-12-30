@@ -1,9 +1,9 @@
-function [M,Mpp,Mpa,Maa,B,Bp,Ba,W,W_d,Wp,Wa,Wp_d,Wa_d]=dynamics_mat(q, q_d)
+function [M,Mpp,Mpa,Maa,B,Bp,Ba,G,Gp,Ga,W,W_d,Wp,Wa,Wp_d,Wa_d]=dynamics_mat(q, q_d, damping)
 % DYNAMICS_MAT    Model of three-link robot cat.
 % Xianle Zeng
-% 28-Dec-2024 21:44:28
+% 30-Dec-2024 20:32:50
 
-[m, l, I_c, d, w, b, c]=model_params;
+[m, l, I_c, d, w, b, c]=model_params('damping', damping);
 
 x=q(1); y=q(2); theta=q(3); phi=q(4); 
 x_d=q_d(1); y_d=q_d(2); theta_d=q_d(3); phi_d=q_d(4); 
@@ -47,6 +47,15 @@ Bp(3)=(c*(2*b^2*phi_d + 2*b^2*theta_d + 2*l^2*theta_d + theta_d*w^2 + 2*l*y_d*co
 % Ba matrix
 Ba=zeros(1,1);
 Ba(1)=b*c*(b*phi_d + b*theta_d + y_d*cos(phi + theta) - x_d*sin(phi + theta) + l*theta_d*cos(phi));
+
+% G matrix
+G=zeros(4,1);
+
+% Ga matrix
+Ga=zeros(1,1);
+
+% Gp matrix
+Gp=zeros(3,1);
 
 % W matrix
 W=zeros(2, 4);
