@@ -215,7 +215,7 @@ ylabel('$\phi(t)$ [deg]', 'Interpreter', 'latex');
 grid on;
 set(gca, 'FontSize', 14);
 % axis tight;
-saveas(gcf, 'images/Q4_a.png');
+saveas(gcf, '../images/Q6_a.png');
 
 %% Plot the angle theta
 %
@@ -233,7 +233,7 @@ grid on;
 grid on;
 set(gca, 'FontSize', 14);
 % axis tight;
-saveas(gcf, 'images/Q4_b.png');
+saveas(gcf, '../images/Q6_b.png');
 
 %% Plot velocity of the point P projected along body direction e'_1
 %
@@ -252,7 +252,7 @@ grid on;
 grid on;
 set(gca, 'FontSize', 14);
 % axis tight;
-saveas(gcf, 'images/Q4_c.png');
+saveas(gcf, '../images/Q6_c.png');
 
 %% Trajectory 
 %
@@ -271,7 +271,7 @@ grid on;
 grid on;
 set(gca, 'FontSize', 14);
 % axis tight;
-saveas(gcf, 'images/Q4_d.png');
+saveas(gcf, '../images/Q6_d.png');
 
 
 %% lambda
@@ -294,7 +294,7 @@ lgd.FontSize = 15;
 grid on;
 set(gca, 'FontSize', 14);
 % axis tight;
-saveas(gcf, 'images/Q4_e.png');
+saveas(gcf, '../images/Q6_e.png');
 
 
 %% Inertia force and damping force
@@ -315,5 +315,5 @@ lgd.Interpreter = 'latex';
 lgd.FontSize = 14;  
 grid on;
 set(gca, 'FontSize', 10);
-saveas(gcf, 'images/Q4_f.png');
+saveas(gcf, '../images/Q6_f.png');
 

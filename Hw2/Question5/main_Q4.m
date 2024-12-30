@@ -157,27 +157,14 @@ for i = 1:n_data
     lambda_x(i) = lambda_data(1,i)*n_P(i,:)*x_hat' + lambda_data(2,i)*n_3(i,:)*x_hat'; 
 end
 
-v_wheel_3_data = zeros(2,n_data);
-v_wheel_3_t_3 = zeros(n_data,1);
-for i = 1:n_data
-    v_wheel_3_data(:,i) = v_wheel_3(q(:,i), q_d(:,i));
-    v_wheel_3_t_3(i) = t_3(i,:)*v_wheel_3_data(:,i);
-end
-
-F_damp_x = zeros(n_data,1);
-
-for i = 1:n_data
-    F_damp_1 = -P_d_e1_prime(i)*e1_prime(i,:)';
-    F_damp_2 = -v_wheel_3_t_3(i)*t_3(i,:)';
-    F_damp_x(i) = F_damp_1(1) + F_damp_2(1);
-end
-
 reactant_x = lambda_x;
 
 
 %% reaction forces in x_hat dir  (damping)
 %
 n_P_damping = [cos(theta_damping(:) + pi/2), sin(theta_damping(:) + pi/2)];
+t_1_damping = [cos(theta_damping(:)), sin(theta_damping(:))];
+t_2_damping = t_1_damping;
 n_3_damping = [cos(theta_damping(:) + phi(:) + pi/2), sin(theta_damping(:) + phi(:) + pi/2)];
 t_3_damping = [cos(theta_damping(:) + phi(:)), sin(theta_damping(:) + phi(:))];
 x_hat = [1, 0];
@@ -187,19 +174,29 @@ for i = 1:n_data
     lambda_x_damping(i) = lambda_damping_data(1,i)*n_P_damping(i,:)*x_hat' + lambda_damping_data(2,i)*n_3_damping(i,:)*x_hat'; 
 end
 
+v_wheel_1_data_damping = zeros(2,n_data);
+v_wheel_1_t_1_damping = zeros(n_data,1);
+
+v_wheel_2_data_damping = zeros(2,n_data);
+v_wheel_2_t_2_damping = zeros(n_data,1);
+
 v_wheel_3_data_damping = zeros(2,n_data);
 v_wheel_3_t_3_damping = zeros(n_data,1);
+
 for i = 1:n_data
-    v_wheel_3_data_damping(:,i) = v_wheel_3(q_damping(:,i), q_damping_d(:,i));
-    v_wheel_3_t_3_damping(i) = t_3(i,:)*v_wheel_3_data_damping(:,i);
+    [v_wheel_1_data_damping(:,i), v_wheel_2_data_damping(:,i), v_wheel_3_data_damping(:,i)] = v_wheel(q_damping(:,i), q_damping_d(:,i));
+    v_wheel_1_t_1_damping(i) = t_1_damping(i,:)*v_wheel_1_data_damping(:,i);
+    v_wheel_2_t_2_damping(i) = t_2_damping(i,:)*v_wheel_2_data_damping(:,i);
+    v_wheel_3_t_3_damping(i) = t_3_damping(i,:)*v_wheel_3_data_damping(:,i);
 end
 
 F_damp_x_damping = zeros(n_data,1);
 
 for i = 1:n_data
-    F_damp_1_damping = -P_d_e1_prime_damping(i)*e1_prime_damping(i,:)';
-    F_damp_2_damping = -v_wheel_3_t_3_damping(i)*t_3_damping(i,:)';
-    F_damp_x_damping(i) = F_damp_1_damping(1) + F_damp_2_damping(1);
+    F_damp_1_damping = -v_wheel_1_t_1_damping(i)*t_1_damping(i,:)';
+    F_damp_2_damping = -v_wheel_2_t_2_damping(i)*t_2_damping(i,:)';
+    F_damp_3_damping = -v_wheel_3_t_3_damping(i)*t_3_damping(i,:)';
+    F_damp_x_damping(i) = F_damp_1_damping(1) +F_damp_2_damping(1) +  F_damp_3_damping(1);
 end
 
 reactant_x_damping = lambda_x_damping + F_damp_x_damping;
@@ -218,7 +215,7 @@ ylabel('$\phi(t)$ [deg]', 'Interpreter', 'latex');
 grid on;
 set(gca, 'FontSize', 14);
 % axis tight;
-saveas(gcf, 'images/Q4_a.png');
+saveas(gcf, '../images/Q5_a.png');
 
 %% Plot the angle theta
 %
@@ -226,9 +223,9 @@ figure;
 hold on;
 plot(t, rad2deg(theta), 'LineWidth', 4, 'DisplayName', '$c = 0$');
 hold on;
-plot(t, rad2deg(theta_damping), 'LineWidth', 4,  'DisplayName', '$c = 1$');
+plot(t, rad2deg(theta_damping),'--', 'LineWidth', 4,  'DisplayName', '$c = 1$');
 xlabel('Time (t) [s]', 'Interpreter', 'latex');
-ylabel('$\theta(t)$ [deg]',  'Interpreter', 'latex');
+ylabel('$\theta(t)$ [deg]', 'Interpreter', 'latex');
 lgd = legend;  
 lgd.Interpreter = 'latex';  
 lgd.FontSize = 15;  
@@ -236,7 +233,7 @@ grid on;
 grid on;
 set(gca, 'FontSize', 14);
 % axis tight;
-saveas(gcf, 'images/Q4_b.png');
+saveas(gcf, '../images/Q5_b.png');
 
 %% Plot velocity of the point P projected along body direction e'_1
 %
@@ -255,9 +252,9 @@ grid on;
 grid on;
 set(gca, 'FontSize', 14);
 % axis tight;
-saveas(gcf, 'images/Q4_c.png');
+saveas(gcf, '../images/Q5_c.png');
 
-%% 
+%% Trajectory 
 %
 figure;
 hold on;
@@ -269,12 +266,12 @@ ylabel('y [m]', 'Interpreter', 'latex');
 lgd = legend;  
 lgd.Interpreter = 'latex';  
 lgd.FontSize = 15;  
-lgd.Location = 'southeast'; % 设置图例位置为右下角 
+lgd.Location = 'southeast'; 
 grid on;
 grid on;
 set(gca, 'FontSize', 14);
 % axis tight;
-saveas(gcf, 'images/Q4_d.png');
+saveas(gcf, '../images/Q5_d.png');
 
 
 %% lambda
@@ -297,10 +294,10 @@ lgd.FontSize = 15;
 grid on;
 set(gca, 'FontSize', 14);
 % axis tight;
-saveas(gcf, 'images/Q4_e.png');
+saveas(gcf, '../images/Q5_e.png');
 
 
-%%
+%% Inertia force and damping force
 %
 figure;
 hold on;
@@ -318,4 +315,5 @@ lgd.Interpreter = 'latex';
 lgd.FontSize = 14;  
 grid on;
 set(gca, 'FontSize', 10);
-saveas(gcf, 'images/Q4_f.png');
+saveas(gcf, '../images/Q5_f.png');
+

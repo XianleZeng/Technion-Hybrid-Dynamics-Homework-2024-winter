@@ -1,0 +1,1 @@
+[m, l, I_c, d, w, b, c]=model_params('damping', true);

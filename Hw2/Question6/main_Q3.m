@@ -169,7 +169,7 @@ lgd.Interpreter = 'latex';
 lgd.FontSize = 15;  
 grid on;
 set(gca, 'FontSize', 14);
-saveas(gcf, 'images/Q3_f.png');
+saveas(gcf, 'images/Q4_f.png');
 
 
 %% slip velocity
@@ -198,4 +198,4 @@ legend({'$\mathbf{w}_1(\mathbf{q}(t)) \dot{\mathbf{q}}(t)$', ...
     'Interpreter', 'latex', 'FontSize', 15, 'Location', 'northeast');
 set(gca, 'FontSize', 15, 'LineWidth', 1.2);
 ylim([-2, 2]);
-saveas(gcf, 'images/Q3_g.png');
+saveas(gcf, 'images/Q4_g.png');

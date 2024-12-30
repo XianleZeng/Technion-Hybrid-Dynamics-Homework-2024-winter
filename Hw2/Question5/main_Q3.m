@@ -3,8 +3,8 @@ close all;
 
 %% Solve DAE without damping
 %
-options = odeset('RelTol', 1e-6, 'AbsTol', 1e-6);
-tspan = 0:0.1:100;  
+options = odeset('RelTol', 1e-8, 'AbsTol', 1e-8);
+tspan = 0:0.01:100;  
 X0 = [0; 0; 0; 0; 0; 0; 0; 0];   % x_0, y_0, theta_0, phi_0, dx_0, dy_0, dtheta_0, dphi_0     
 [t, X] = ode45(@state_eq_Q3, tspan, X0, options);  % dX = f(X)
 n_data = length(t);
@@ -122,9 +122,9 @@ ylabel('$v_P$ [m/s]', 'Interpreter', 'latex');
 grid on;
 set(gca, 'FontSize', 14);
 % axis tight;
-saveas(gcf, 'images/Q3_a.png');
+saveas(gcf, 'images/Q3_c.png');
 
-%%
+%% trajectory
 %
 figure;
 hold on;
@@ -134,7 +134,7 @@ ylabel('y [m]', 'Interpreter', 'latex');
 grid on;
 set(gca, 'FontSize', 14);
 % axis tight;
-% saveas(gcf, 'images/a.png');
+saveas(gcf, 'images/Q3_d.png');
 
 
 %% lambda
@@ -145,17 +145,17 @@ plot(t, lambda_data(1,:), 'LineWidth', 3, 'DisplayName', '$\lambda_1$')
 hold on;
 plot(t, lambda_data(2,:), 'LineWidth', 3, 'DisplayName', '$\lambda_2$')
 xlabel('Time (t) [s]', 'Interpreter', 'latex');
-ylabel('lambda [N]', 'Interpreter', 'latex');
+ylabel('$\lambda$ [N]', 'Interpreter', 'latex');
 lgd = legend;  
 lgd.Interpreter = 'latex';  
-lgd.FontSize = 25;  
+lgd.FontSize = 15;  
 grid on;
 set(gca, 'FontSize', 14);
 % axis tight;
-% saveas(gcf, 'images/f.png');
+saveas(gcf, 'images/Q3_e.png');
 
 
-%%
+%% Inertia force and damping force
 %
 figure;
 hold on;
@@ -163,9 +163,39 @@ plot(t, inertia_force_x, 'LineWidth', 3, 'DisplayName', 'Inertia force')
 hold on;
 plot(t, reactant_x, '--', 'LineWidth', 3, 'DisplayName', 'Reactant')
 xlabel('Time (t) [s]', 'Interpreter', 'latex');
-ylabel('lambda [N]', 'Interpreter', 'latex');
+ylabel('Forces [N]', 'Interpreter', 'latex');
 lgd = legend;  
 lgd.Interpreter = 'latex';  
-lgd.FontSize = 25;  
+lgd.FontSize = 15;  
 grid on;
 set(gca, 'FontSize', 14);
+saveas(gcf, 'images/Q4_f.png');
+
+
+%% slip velocity
+%
+v_slip_1 = zeros(length(t), 1);
+v_slip_2 = zeros(length(t), 1);
+
+for i = 1:length(t)
+    damping = false;
+    [M,Mpp,Mpa,Maa,B,Bp,Ba,G,Gp,Ga,W,W_d,Wp,Wa,Wp_d,Wa_d]=dynamics_mat(q(:, i), q_d(:, i), damping);
+    w1 = W(1, :);
+    w2 = W(2, :);
+    v_slip_1(i) = w1 * q_d(:, i);
+    v_slip_2(i) = w2 * q_d(:, i);
+end
+
+figure;
+plot(t, v_slip_1, 'LineWidth', 3);hold on;
+plot(t, v_slip_2, '--', 'LineWidth', 2); 
+ylim([-2, 2]);
+grid on;
+xlabel('Time (s)', 'Interpreter', 'latex', 'FontSize', 15);
+ylabel('Slip Velocities $[\mathrm{m/s}]$', 'Interpreter', 'latex', 'FontSize', 15);
+legend({'$\mathbf{w}_1(\mathbf{q}(t)) \dot{\mathbf{q}}(t)$', ...
+    '$\mathbf{w}_2(\mathbf{q}(t)) \dot{\mathbf{q}}(t)$'}, ...
+    'Interpreter', 'latex', 'FontSize', 15, 'Location', 'northeast');
+set(gca, 'FontSize', 15, 'LineWidth', 1.2);
+ylim([-2, 2]);
+saveas(gcf, 'images/Q4_g.png');
