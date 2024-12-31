@@ -75,10 +75,12 @@ end
 lambda_damping_data = [];
 qp_dd_data_damping = [];
 damping = true;
+F_qa_data_damping = [];
 for i = 1:length(t)
     [qp_dd_damping, F_qa_damping, lambda_damping]=dyn_sol_Q4(t(i),qp_damping(:,i)',qp_damping_d(:,i)',damping);
     lambda_damping_data = [lambda_damping_data, lambda_damping];
     qp_dd_data_damping = [qp_dd_data_damping, qp_dd_damping];
+    F_qa_data_damping = [F_qa_data_damping, F_qa_damping];
 end
 q_dd_damping = [qp_dd_data_damping; phi_dd];
 
@@ -88,10 +90,12 @@ q_dd_damping = [qp_dd_data_damping; phi_dd];
 lambda_data = [];
 qp_dd_data = [];
 damping = false;
+F_qa_data = [];
 for i = 1:length(t)
     [qp_dd, F_qa, lambda]=dyn_sol_Q4(t(i),qp(:,i)',qp_d(:,i)',damping);
     lambda_data = [lambda_data, lambda];
     qp_dd_data = [qp_dd_data, qp_dd];
+    F_qa_data = [F_qa_data, F_qa];
 end
 q_dd = [qp_dd_data; phi_dd];
 
@@ -316,4 +320,20 @@ lgd.FontSize = 14;
 grid on;
 set(gca, 'FontSize', 10);
 saveas(gcf, 'images/Q4_f.png');
+
+%% Inertia force and damping force
+%
+figure;
+hold on;
+plot(t, F_qa_data, 'LineWidth', 3, 'DisplayName', 'c=0')
+hold on;
+plot(t, F_qa_data_damping, '--', 'LineWidth', 3, 'DisplayName', 'c=1')
+xlabel('Time (t) [s]', 'Interpreter', 'latex');
+ylabel('Torque [Nm]', 'Interpreter', 'latex');
+lgd = legend;  
+lgd.Interpreter = 'latex';  
+lgd.FontSize = 14;  
+grid on;
+set(gca, 'FontSize', 10);
+saveas(gcf, 'images/Q4_F_qa.png');
 
