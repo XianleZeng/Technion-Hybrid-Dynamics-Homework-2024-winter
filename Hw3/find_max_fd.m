@@ -45,7 +45,6 @@ c = [0; 0; 0; 0; 1];
 
 [X_max, ~, exitflag_max] = linprog(-c, A, b, A_tilde, b_tilde);
 
-
 if exitflag_max == -2
     disp("No feasible solution.")
     fd_max = Nan;

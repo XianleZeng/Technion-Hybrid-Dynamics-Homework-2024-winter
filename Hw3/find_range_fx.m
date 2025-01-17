@@ -68,6 +68,76 @@ else
     end
 end
 
-saveas(gcf, ".\images\mu1_"+ num2str(mu1) + "mu2_" + num2str(mu2) + ".pdf");
+%%%%%%%%%%% plot result with force directions %%%%%%%%%%%%%%
+figure;
+legends = [];
+
+% Contact Normal
+line([r1x, r1x + 5*cos(alpha1)], [r1y, r1y + 5*sin(alpha1)], 'Color', 'blue', 'LineStyle', '--', 'LineWidth', 2);
+hold on;
+line([r2x, r2x + 5*cos(alpha2)], [r2y, r2y + 5*sin(alpha2)], 'Color', 'blue', 'LineStyle', '--', 'LineWidth', 2);
+
+legends = [legends, "Contact Normal", ""];
+
+% Contact Points
+plot(r1x, r1y, 'k*', 'LineWidth', 3);
+plot(r2x, r2y, 'k*', 'LineWidth', 3);
+
+legends = [legends, "Contact Points", ""];
+
+% Ground Lines
+plot([r1x - 0.7*t1x, r1x + 0.7*t1x], [r1y - 0.7*t1y, r1y + 0.7*t1y], 'k-', 'LineWidth', 2);
+plot([r2x - 0.7*t2x, r2x + 0.7*t2x], [r2y - 0.7*t2y, r2y + 0.7*t2y], 'k-', 'LineWidth', 2);
+
+legends = [legends, "", ""];
+
+% Friction Cone Lines
+line([r1x, r1x + 5*cos(alpha1 + atan(mu1))], [r1y, r1y + 5*sin(alpha1 + atan(mu1))], 'Color', 'red', 'LineWidth', 1.5);
+line([r1x, r1x + 5*cos(alpha1 - atan(mu1))], [r1y, r1y + 5*sin(alpha1 - atan(mu1))], 'Color', 'red', 'LineWidth', 1.5);
+line([r2x, r2x + 5*cos(alpha2 + atan(mu2))], [r2y, r2y + 5*sin(alpha2 + atan(mu2))], 'Color', 'red', 'LineWidth', 1.5);
+line([r2x, r2x + 5*cos(alpha2 - atan(mu2))], [r2y, r2y + 5*sin(alpha2 - atan(mu2))], 'Color', 'red', 'LineWidth', 1.5);
+
+legends = [legends, "Boundary lines of the friction cones", "", "", ""];
+
+% Plot the Center of Mass
+plot(x_c, y_c, 'go', 'MarkerSize', 8, 'LineWidth', 2);
+legends = [legends, "Center of Mass"];
+
+% Plot resultant force direction range (filled region)
+
+if ~isnan(fx_min) && ~isnan(fx_max)
+    % Calculate resultant force magnitudes
+    F_min = sqrt(fx_min^2 + (m * g)^2);
+    F_max = sqrt(fx_max^2 + (m * g)^2);
+    
+    % Calculate directions for fx_min and fx_max
+    theta_min = atan2(-m * g, fx_min);
+    theta_max = atan2(-m * g, fx_max);
+    
+    % Compute the points of the filled area
+    x_fill = [x_c, x_c + F_min * cos(theta_min), x_c + F_max * cos(theta_max)];
+    y_fill = [y_c, y_c + F_min * sin(theta_min), y_c + F_max * sin(theta_max)];
+    
+    % Plot the filled region
+    fill(x_fill, y_fill, 'magenta', 'FaceAlpha', 0.3, 'EdgeColor', 'none');
+    hold on;
+    
+    % Plot the boundary arrows
+    quiver(x_c, y_c, F_min * cos(theta_min), F_min * sin(theta_min), ...
+           'Color', 'magenta', 'LineWidth', 1.5, 'MaxHeadSize', 0.5, 'AutoScale', 'off');
+    quiver(x_c, y_c, F_max * cos(theta_max), F_max * sin(theta_max), ...
+           'Color', 'magenta', 'LineWidth', 1.5, 'MaxHeadSize', 0.5, 'AutoScale', 'off');
+    
+    legends = [legends, "Resultant force range"];
 end
 
+axis equal;
+xlabel('${x}$ [m]', 'Interpreter', 'Latex');
+ylabel('${y}$ [m]', 'Interpreter', 'Latex');
+
+legend(legends, 'Interpreter', 'Latex');
+title("\textbf{Friction coefficients: $\mu_1=" + num2str(mu1) + ",  \mu_2=" + num2str(mu2) + "$} \ " + ...
+      "\textbf{Permissiable force: $" + num2str(fx_min) + " \leq f_x \leq " + num2str(fx_max) + "$}", ...
+      'Interpreter', 'latex');
+saveas(gcf, ".\images\find_max_fx.png");
+end

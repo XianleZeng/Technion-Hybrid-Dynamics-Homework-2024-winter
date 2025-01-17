@@ -135,6 +135,6 @@ legend(legends)
 title("\textbf{Friction coefficients: $\mu_1=" + num2str(mu1) + ",  \mu_2=" + num2str(mu2) + "$} \ " + ...
       "\textbf{Permission COM region: $" + num2str(x_min) + " \leq x_c \leq " + num2str(x_max) + "$}", ...
       'Interpreter', 'latex');
-saveas(gcf, ".\images\mu1_"+ num2str(mu1) + "mu2_" + num2str(mu2) + ".pdf");
+saveas(gcf, ".\images\mu1_"+ num2str(mu1) + "mu2_" + num2str(mu2) + ".png");
 end
 
