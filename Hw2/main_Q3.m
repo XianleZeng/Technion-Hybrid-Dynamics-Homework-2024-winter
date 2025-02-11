@@ -189,7 +189,7 @@ end
 figure;
 plot(t, v_slip_1, 'LineWidth', 3);hold on;
 plot(t, v_slip_2, '--', 'LineWidth', 2); 
-ylim([-2, 2]);
+% ylim([-2, 2]);
 grid on;
 xlabel('Time (s)', 'Interpreter', 'latex', 'FontSize', 15);
 ylabel('Slip Velocities $[\mathrm{m/s}]$', 'Interpreter', 'latex', 'FontSize', 15);
@@ -197,5 +197,5 @@ legend({'$\mathbf{w}_1(\mathbf{q}(t)) \dot{\mathbf{q}}(t)$', ...
     '$\mathbf{w}_2(\mathbf{q}(t)) \dot{\mathbf{q}}(t)$'}, ...
     'Interpreter', 'latex', 'FontSize', 15, 'Location', 'northeast');
 set(gca, 'FontSize', 15, 'LineWidth', 1.2);
-ylim([-2, 2]);
+% ylim([-2, 2]);
 saveas(gcf, 'images/Q3_g.png');

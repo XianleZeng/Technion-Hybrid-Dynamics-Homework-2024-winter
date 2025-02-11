@@ -1,0 +1,175 @@
+clear;
+close all;
+
+%% Solve DAE without damping
+%
+options = odeset('RelTol', 1e-8, 'AbsTol', 1e-8);
+t0 = 5.2104;
+time_span = 12; % sec
+slip_dir = 1;
+q0 = [11.3225196529297;
+-0.600000000000000;
+-1.72501778753234;
+1.64662582096235;
+1.52953715263740;
+1.21968928885604e-16;
+2.36962002164852;
+2.54922858772900];   % x_0, y_0, theta_0, phi_0, dx_0, dy_0, dtheta_0, dphi_0     
+op_slip = odeset('reltol',1e-8,'abstol',1e-8,'Events',@(t, q)events_slip(t, q, slip_dir));
+[t_slip, q_slip, Te_slip, Xe_slip, Ie_slip] = ode45(@(t, q)sys_slip(t, q, slip_dir), [t0, time_span], q0, op_slip);
+% n_data = length(t);
+% 
+% plot(t, X(:,3));
+
+%%
+clear all; clc;
+ 
+[m_1, m_2, l, h, J_1, J_2, R, g, mu]=model_params();
+phi_d_0 = 1.29; % rad/s
+q0 = [0; -R; 0; 0; 0; 0; 0; phi_d_0];
+t0 = 0;
+ 
+time_span = 10; % sec
+ 
+t_total = [];
+q_total = [];
+ 
+contact = 1; % assume begin with contact
+slip = 0;
+separation = 0;
+
+contact_type = [];
+t_contact_type = [0];
+
+
+Ie_stick = -1;
+Ie_slip = -1;
+
+ 
+while (separation == 0 & ~isempty(Ie_stick) & ~isempty(Ie_slip))
+    if (contact == 1)
+        op_stick = odeset('reltol',1e-8,'abstol',1e-8,'Events',@(t, q)events_stick(t, q));
+        [t_stick, q_stick, Te_stick, Xe_stick, Ie_stick] = ode45(@(t,q)sys_stick(t, q), [t0, time_span], q0, op_stick);
+        
+        t_total = [t_total; t_stick];
+        q_total = [q_total; q_stick];
+        
+        t0 = t_stick(end);
+        q0 = Xe_stick;
+        
+        t_contact_type = [t_contact_type; Te_stick];
+        contact_type = [contact_type; 1]; % STICK
+        
+        if ~isempty(Ie_stick)
+           contact = 0;
+           slip = 1;
+           slip_dir = Ie_stick;
+        end
+    end
+
+
+    if (slip == 1)
+        op_slip = odeset('reltol',1e-8,'abstol',1e-8,'Events',@(t, q)events_slip(t, q, slip_dir));
+        [t_slip, q_slip, Te_slip, Xe_slip, Ie_slip] = ode45(@(t, q)sys_slip(t, q, slip_dir), [t0, time_span], q0, op_slip);
+        if (length(Ie_slip) == 2)
+            Ie_slip = Ie_slip(2);
+            Te_slip = Te_slip(2);
+            Xe_slip = Xe_slip(2, :);
+        end
+
+        t_total = [t_total; t_slip];
+        q_total = [q_total; q_slip];
+        
+        t0 = t_slip(end);
+        q0 = Xe_slip';
+        
+        t_contact_type = [t_contact_type; Te_slip];
+    
+    
+        if (slip_dir == 1)
+            contact_type = [contact_type; 2]; % SLIP (positive)
+        elseif (slip_dir == 2)
+            contact_type = [contact_type; 3]; % SLIP (negative)
+        end
+    
+        if (Ie_slip == 1)
+        
+            q_ = q_slip(end, 1:4)';  q_d_ = q_slip(end, 5:8)';
+            
+            [~, lambda] = dyn_sol_stick(t_slip(end),q_,q_d_);  % A*[q_dd; lambda] = B
+            
+            lambda_t = lambda(1);
+            lambda_n = lambda(2);
+        
+            if (abs(lambda_t) < mu*lambda_n)
+                contact = 1;
+                slip = 0;
+            else
+                if slip_dir == 1
+                    slip_dir = 2;
+                elseif slip_dir == 2
+                    slip_dir = 1;
+                end  
+            end
+        
+        elseif (Ie_slip == 2)
+            separation = 1;
+            t_contact_type = [t_contact_type; Te_slip];
+            contact_type = [contact_type; 4]; % STICK
+        end
+    end 
+end
+
+%%
+t = t_total;
+
+q = q_total(:, 1:4)';  q_d = q_total(:, 5:8)';
+x = q(1,:);
+y = q(2,:);
+th = q(3,:);
+ph = q(4,:);
+x_d = q_d(1,:);
+y_d = q_d(2,:);
+th_d = q_d(3,:);
+ph_d = q_d(4,:);
+
+
+%% plot (a): theta(t) and phi(t)
+figure(1)
+ 
+subplot(2,1,1)
+plot(t, rad2deg(th), '-','LineWidth', 2)
+ 
+xlabel('${t}$ [sec]','Interpreter','Latex')
+ylabel('${\theta}$ [deg]','Interpreter','Latex')
+title('${\theta(t)}$','Interpreter','Latex')
+ 
+subplot(2,1,2)
+plot(t, rad2deg(ph), '-','LineWidth', 2)
+ 
+xlabel('${t}$ [sec]','Interpreter','Latex')
+ylabel('${\phi}$ [deg]','Interpreter','Latex')
+title('${\phi(t)}$','Interpreter','Latex')
+
+
+%% plot (b): vt(t)
+figure(2)
+ 
+vt = x_d-R*ph_d;
+plot(t, vt, '-','LineWidth', 2)
+ 
+xlabel('${t}$ [sec]','Interpreter','Latex')
+ylabel('${v_t}$ [m/s]','Interpreter','Latex')
+title('${v_t(t)}$','Interpreter','Latex')
+
+%% plot (c): lam_n(t)
+figure(3)
+[lam_n, lam_t] = lambda(t, q, q_d, t_contact_type, contact_type, separation);
+plot(t, lam_t./lam_n, '-','LineWidth', 2)
+% hold on
+% plot(t, t*0, '--', 'Color', '#A2142F', 'LineWidth', 1.5)
+
+xlabel('${t}$ [sec]','Interpreter','Latex')
+ylabel('${\lambda_n}$ [N]','Interpreter','Latex')
+title('${\lambda_n(t)}$','Interpreter','Latex')
+

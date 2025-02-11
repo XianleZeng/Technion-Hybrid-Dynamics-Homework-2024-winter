@@ -403,8 +403,6 @@ end
 fprintf(fid,'end \n');
 
 
-
-
 %% Third, output model to a file called
 %%
 %%    v_wheel_3.m

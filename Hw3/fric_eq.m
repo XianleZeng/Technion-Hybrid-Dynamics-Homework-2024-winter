@@ -43,8 +43,14 @@ b_tilde = [0; m*g; 0];
 
 c = [0; 0; 0; 0; 1]; 
 
-[X_min, ~, exitflag_min] = linprog(c, A, b, A_tilde, b_tilde);
-[X_max, ~, exitflag_max] = linprog(-c, A, b, A_tilde, b_tilde);
+options = optimoptions('linprog', ...
+    'OptimalityTolerance', 1e-12, ... % 设置最优性容差
+    'ConstraintTolerance', 1e-12, ... % 设置约束容差
+    'Display', 'iter'); % 显示迭代过程
+
+
+[X_min, ~, exitflag_min] = linprog(c, A, b, A_tilde, b_tilde, [], [], options);
+[X_max, ~, exitflag_max] = linprog(-c, A, b, A_tilde, b_tilde, [], [], options);
 
 
 if exitflag_min == -2 || exitflag_max == -2
