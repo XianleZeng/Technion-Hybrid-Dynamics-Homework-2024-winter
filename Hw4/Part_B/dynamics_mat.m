@@ -1,7 +1,7 @@
-function [M,B,G,W,W_d]=dynamics_mat(q, q_d)
+function [M,B,G,W,W_d]=dynamics_mat(q, q_d, damping)
 % DYNAMICS_MAT    Model of three-link robot cat.
 % Xianle Zeng
-% 03-Feb-2025 22:25:46
+% 11-Feb-2025 23:20:02
 
 [m_1, m_2, l, h, J_1, J_2, R, g, mu]=model_params();
 

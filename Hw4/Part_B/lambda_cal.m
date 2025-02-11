@@ -1,4 +1,4 @@
-function [lam_n, lam_t] = lambda(t, q, q_d, t_contact_type, contact_type, separation)
+function [lam_n, lam_t] = lambda_cal(t, q, q_d, t_contact_type, contact_type, separation)
 
     [m_1, m_2, l, h, J_1, J_2, R, g, mu]=model_params();
     lam_n = zeros(1,length(t));
@@ -36,7 +36,7 @@ function [lam_n, lam_t] = lambda(t, q, q_d, t_contact_type, contact_type, separa
             lam_t(i) = -sigma*mu*lam_n(i);
             
         elseif (state == 3)
-            slip_dir = -1;
+            slip_dir = 2;
             sigma = -1;
             [~, lambda]=dyn_sol_slip(t,q(:,i),q_d(:,i),slip_dir);
             lam_n(i) = lambda;

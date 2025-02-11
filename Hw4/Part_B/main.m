@@ -1,9 +1,12 @@
-%%
-clear all; clc;
+close all
+clc 
+clear
  
+save = 1;
+
 [m_1, m_2, l, h, J_1, J_2, R, g, mu]=model_params();
-phi_d_0 = 1.4; % rad/s
-q0 = [0; -R; 0; 0; 0; 0; 0; phi_d_0];
+phi_d_0 = 17.45*0.25 + 1.291*0.75; % rad/s
+q0 = [0; R; 0; 0; 0; 0; 0; phi_d_0];
 t0 = 0;
  
 time_span = 10; % sec
@@ -18,10 +21,8 @@ separation = 0;
 contact_type = [];
 t_contact_type = [0];
 
-
 Ie_stick = -1;
 Ie_slip = -1;
-
  
 while (separation == 0 & ~isempty(Ie_stick) & ~isempty(Ie_slip))
     if (contact == 1)
@@ -90,7 +91,7 @@ while (separation == 0 & ~isempty(Ie_stick) & ~isempty(Ie_slip))
             end
         
         elseif (Ie_slip == 2)
-            separation = 1;
+            separation = 1
             t_contact_type = [t_contact_type; Te_slip];
             contact_type = [contact_type; 4]; % STICK
         end
@@ -115,19 +116,73 @@ ph_d = q_d(4,:);
 figure(1)
  
 subplot(2,1,1)
-plot(t, rad2deg(th), '-','LineWidth', 2)
+% plot(t, rad2deg(th), '-','LineWidth', 2)
+
+t_con = [t_contact_type; time_span];
+for i = 1:length(contact_type)
+    
+    con = contact_type(i);
+    
+    idx = find(t >= t_con(i)-0.0001 & t < t_con(i+1));
+    if isempty(idx)
+        break;
+    end
+    if (idx(1)~=1)
+        idx = [idx(1)-1; idx];
+    end
+    t_i = t(idx);
+    th_i = rad2deg(th(idx)); 
+    
+    if con == 1
+        plot(t_i, th_i, '-', 'Color', '#0072BD', 'LineWidth', 1.5)
+    elseif con == 2 || con == 3
+        plot(t_i, th_i, '--', 'Color', '#EDB120', 'LineWidth', 1.5)
+    end
+    
+    hold on
+end
+
+legend("${\theta(t)}$ - Stick", "${\theta(t)}$ - Slip",'Interpreter','Latex')
  
 xlabel('${t}$ [sec]','Interpreter','Latex')
 ylabel('${\theta}$ [deg]','Interpreter','Latex')
 title('${\theta(t)}$','Interpreter','Latex')
  
 subplot(2,1,2)
-plot(t, rad2deg(ph), '-','LineWidth', 2)
- 
+% plot(t, rad2deg(ph), '-','LineWidth', 2)
+
+t_con = [t_contact_type; time_span];
+for i = 1:length(contact_type)
+    
+    con = contact_type(i);
+    
+    idx = find(t >= t_con(i)-0.0001 & t < t_con(i+1));
+    if isempty(idx)
+        break;
+    end
+    if (idx(1)~=1)
+        idx = [idx(1)-1; idx];
+    end
+    t_i = t(idx);
+    ph_i = rad2deg(ph(idx)); 
+    
+    if con == 1
+        plot(t_i, ph_i, '-', 'Color', '#0072BD', 'LineWidth', 1.5)
+    elseif con == 2 || con == 3
+        plot(t_i, ph_i, '--', 'Color', '#EDB120', 'LineWidth', 1.5)
+    end
+    
+    hold on
+end
+
+legend("${\phi(t)}$ - Stick", "${\phi(t)}$ - Slip",'Interpreter','Latex')
+
 xlabel('${t}$ [sec]','Interpreter','Latex')
 ylabel('${\phi}$ [deg]','Interpreter','Latex')
 title('${\phi(t)}$','Interpreter','Latex')
-
+if (save == 1)
+    saveas(gcf, ".\images\a_omega_0_"+ num2str(phi_d_0) + ".png");
+end
 
 %% plot (b): vt(t)
 figure(2)
@@ -138,21 +193,53 @@ plot(t, vt, '-','LineWidth', 2)
 xlabel('${t}$ [sec]','Interpreter','Latex')
 ylabel('${v_t}$ [m/s]','Interpreter','Latex')
 title('${v_t(t)}$','Interpreter','Latex')
-
+if (save == 1)
+    saveas(gcf, ".\images\b_omega_0_"+ num2str(phi_d_0) + ".png");
+end
 %% plot (c): lam_n(t)
 figure(3)
-[lam_n, ~] = lambda(t, q, q_d, t_contact_type, contact_type, separation);
+[lam_n, ~] = lambda_cal(t, q, q_d, t_contact_type, contact_type, separation);
 plot(t, lam_n, '-','LineWidth', 2)
-% hold on
-% plot(t, t*0, '--', 'Color', '#A2142F', 'LineWidth', 1.5)
+t_con = [t_contact_type; time_span];
+for i = 1:length(contact_type)
+    
+    con = contact_type(i);
+    
+    idx = find(t >= t_con(i)-0.0001 & t < t_con(i+1));
+    if isempty(idx)
+        break;
+    end
+    if (idx(1)~=1)
+        idx = [idx(1)-1; idx];
+    end
+    t_i = t(idx);
+    lam_n_i = lam_n(idx); 
+    
+    if con == 1
+        plot(t_i, lam_n_i, '-', 'Color', '#0072BD', 'LineWidth', 1.5)
+    elseif con == 2 || con == 3
+        plot(t_i, lam_n_i, '--', 'Color', '#EDB120', 'LineWidth', 1.5)
+    end
+    
+    hold on
+end
+
+legend("${\lambda_n(t)}$ - Stick", "${\lambda_n(t)}$ - Slip",'Interpreter','Latex')
+
+
+hold on
+plot(t, t*0, '--', 'Color', '#A2142F', 'LineWidth', 1.5)
 
 xlabel('${t}$ [sec]','Interpreter','Latex')
 ylabel('${\lambda_n}$ [N]','Interpreter','Latex')
 title('${\lambda_n(t)}$','Interpreter','Latex')
+if (save == 1)
+    saveas(gcf, ".\images\c_omega_0_"+ num2str(phi_d_0) + ".png");
+end
 
 %% plot (d): lam_t(t)/lam_n(t)
 figure(4)
-[lam_n, lam_t] = lambda(t, q, q_d, t_contact_type, contact_type, separation);
+[lam_n, lam_t] = lambda_cal(t, q, q_d, t_contact_type, contact_type, separation);
 plot(t, lam_t./lam_n, '-', 'Color', '#0072BD', 'LineWidth', 2)
 hold on
 plot(t, mu*ones(length(t),1), '--', 'Color', '#A2142F', 'LineWidth', 1.5)
@@ -163,6 +250,9 @@ ylabel('${\lambda_t/\lambda_n}$ [-]','Interpreter','Latex')
 title('${\lambda_t(t)/\lambda_n(t)}$','Interpreter','Latex')
  
 legend("${\lambda_t(t)/\lambda_n(t)}$", "${\pm \mu}$",'Interpreter','Latex')
+if (save == 1)
+    saveas(gcf, ".\images\d_omega_0_"+ num2str(phi_d_0) + ".png");
+end
 
 %% plot (e): x(t)
 figure(5)
@@ -173,6 +263,9 @@ for i = 1:length(contact_type)
     con = contact_type(i);
     
     idx = find(t >= t_con(i)-0.0001 & t < t_con(i+1));
+    if isempty(idx)
+        break;
+    end
     if (idx(1)~=1)
         idx = [idx(1)-1; idx];
     end
@@ -193,3 +286,6 @@ ylabel('${x}$ [m]','Interpreter','Latex')
 title('${x(t)}$','Interpreter','Latex')
  
 legend("${x(t)}$ - Stick", "${x(t)}$ - Slip",'Interpreter','Latex')
+if (save == 1)
+    saveas(gcf, ".\images\e_omega_0_"+ num2str(phi_d_0) + ".png");
+end

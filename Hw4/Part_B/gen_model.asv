@@ -92,9 +92,8 @@ if isempty(dir([filename,'.mat']))
     Wd_t = W_d(1, :);
     Wd_n = W_d(1, :);
 
-    alpha = simplify(W_n*inv(M)*(W_n - sigma*mu*W_t).');
-    alpha = subs(alpha, {J_1, J_2},{0.1*m_1*R^2, 0.5*m_2*l^2});
-    beta = simplify(W_n*inv(M)*(B + G) -  Wd_n*dq);
+    alpha = W_n*inv(M)*(W_n - sigma*mu*W_t).';
+    beta = W_n*inv(M)*(B + G) 
 
     %%
     %
