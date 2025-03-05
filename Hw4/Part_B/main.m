@@ -2,10 +2,10 @@ close all
 clc 
 clear
  
-save = 1;
+save = 0;
 
 [m_1, m_2, l, h, J_1, J_2, R, g, mu]=model_params();
-phi_d_0 = 17.45*0.25 + 1.291*0.75; % rad/s
+phi_d_0 = 17.45;%*0.25 + 1.291*0.75; % rad/s
 q0 = [0; R; 0; 0; 0; 0; 0; phi_d_0];
 t0 = 0;
  

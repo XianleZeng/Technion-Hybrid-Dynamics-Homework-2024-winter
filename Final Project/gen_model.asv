@@ -1,0 +1,61 @@
+clear
+
+syms x y theta_1 theta_2 real
+syms dx dy dtheta_1 dtheta_2 real
+syms ddx ddy ddtheta_1 ddtheta_2 real
+syms alpha m_h m g l I_c real
+
+%% generalized coordinates
+%
+q = [x; y; theta_1; theta_2];
+dq = [dx; dy; dtheta_1; dtheta_2];
+ddq = [ddx; ddy; ddtheta_1; ddtheta_2];
+N=max(size(q));
+
+%% position of masses in system (center of mass for each solid body)
+%
+r_stance = [x + l*sin(theta_1); y + l*cos(theta_1)];
+r_swing = [x + 2*l*sin(theta_1) + l*sin(theta_2); y + 2*l*cos(theta_1) - l*cos(theta_2)];
+r_hip = [x + 2*l*sin(theta_1); y + 2*l*cos(theta_1)];
+
+%% velocities of masses in system (center of mass for each solid body)
+%
+v_stance = jacobian(r_stance,q)*dq;
+v_swing = jacobian(r_swing,q)*dq;
+v_hip = jacobian(r_hip,q)*dq;
+
+%% kinetic energy of masses in system
+%
+KE_stance = simplify(m/2*(v_stance'*v_stance)) + (1/2)*I_c*dtheta_1^2;
+KE_swing = simplify(m/2*(v_swing'*v_swing)) + (1/2)*I_c*dtheta_2^2;
+KE_hip = simplify(m_h/2*(v_hip'*v_hip));
+KE = KE_stance+KE_swing+KE_hip;
+
+%% potential energy of masses in system
+%
+g = [sin(alpha); -cos(alpha)];
+PE_stance = r_stance(2)*m*g;
+PE_swing = r_swing(2)*m*g;
+PE_hip = r_hip(2)*m_h*g;
+PE=PE_stance+PE_swing+PE_hip;
+
+%% M*ddq + C*dq + G = F + W^T*lambda
+% M
+
+M=simplify(jacobian(jacobian(KE,dq).',dq));
+
+% C
+syms C
+for k=1:N
+    for j=1:N
+        C(k,j)=0;
+        for i=1:N
+            C(k,j)=C(k,j)+1/2*(diff(M(k,j),q(i)) + diff(M(k,i),q(j)) - diff(M(i,j),q(k)))*dq(i);
+        end
+    end
+end
+B = C*dq;
+
+% G
+G = simplify(jacobian(PE, q))';
+
