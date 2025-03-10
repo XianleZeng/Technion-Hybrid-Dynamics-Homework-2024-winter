@@ -2,7 +2,7 @@ clc
 close all
 clear
 
-Z_guess = [0; 0; -0.166539; -0.166539; 0; 0; 0.803329; -0.448996]; % Initial guess from reference thesis
+Z_guess = [-0.166539; -0.166539; 0; 0; 0.803329; -0.448996]; % Initial guess from reference thesis
 Z_star = find_fixed_point(Z_guess);
 % Z_star = [0; 0; -0.166539; -0.166539; 0; 0; 0.803329; -0.448996];
 q0 = Z_star;

@@ -1,0 +1,11 @@
+function Znew = Poincare_map(Zold)
+    X_old = [0; 0; Z_guess(1); Z_guess(1); 0; 0; Z_guess(2); Z_guess(3)];
+    options = odeset('Events', @events_stick);
+    [~, X, ~, ~, ie] = ode45(@sys_stick, [0 10], X_old, options);
+    Z = [X(:,3); X(7); X(8)];
+    if ie == 0 
+        Znew = 'failure';
+    else
+        Znew = impact_law(Z(end, :)');
+    end
+end
